@@ -20,7 +20,7 @@ export class AppService {
 			this.logger.error(
 				`Неудалось сохранить сообщение: ${JSON.stringify(request)}. По причине: ${JSON.stringify(error)}`
 			);
-			throw new Error(error);
+			throw error;
 		}
 	}
 
@@ -36,18 +36,17 @@ export class AppService {
 			}
 		} catch (error) {
 			this.logger.error(`Неудалось получить сообщение: ${id}. По причине: ${JSON.stringify(error)}`);
-			throw new Error(error);
+			throw error;
 		}
 	}
 
 	async deleteMessage(id: number): Promise<number> {
 		try {
-			await this.redis.delete(id.toString());
-			await this.repository.deleteMessage(id);
+			await Promise.all([this.redis.delete(id.toString()), this.repository.deleteMessage(id)]);
 			return id;
 		} catch (error) {
 			this.logger.error(`Неудалось удалить сообщение: ${id}. По причине: ${JSON.stringify(error)}`);
-			throw new Error(error);
+			throw error;
 		}
 	}
 }
