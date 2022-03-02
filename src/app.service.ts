@@ -28,8 +28,9 @@ export class AppService {
 		try {
 			const redisCache = await this.redis.get<MessagePeristedEntity>(id.toString());
 			if (!redisCache) {
-				this.logger.log(`В кеше - пусто, берем из базы.`);
-				return this.repository.getMessageById(id);
+				const message = await this.repository.getMessageById(id);
+				await this.redis.save(id.toString(), message);
+				return message;
 			} else {
 				return redisCache;
 			}
